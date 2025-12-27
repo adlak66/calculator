@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Python Console Calculator</title>
+<style>
+    body {
+        background-color: #0b0b0b;
+        color: #e6e6e6;
+        font-family: Consolas, "Courier New", monospace;
+        margin: 0;
+        padding: 20px;
+    }
+
+    #terminal {
+        white-space: pre-wrap;
+        line-height: 1.3;
+        max-width: 900px;
+        margin: auto;
+    }
+
+    input {
+        background: transparent;
+        border: none;
+        color: #e6e6e6;
+        font-family: inherit;
+        font-size: 16px;
+        outline: none;
+        width: 300px;
+    }
+
+    .prompt {
+        color: #8be9fd;
+    }
+</style>
+</head>
+<body>
+
+<div id="terminal"></div>
+
+<script>
+const terminal = document.getElementById("terminal");
+
+const logo = `
+ _____________________
+|  _________________  |
+| | Pythonista   0. | |  .----------------.  .----------------.  .----------------.  .----------------.
+| |_________________| | | .--------------. || .--------------. || .--------------. || .--------------. |
+|  ___ ___ ___   ___  | | |     ______   | || |      __      | || |   _____      | || |     ______   | |
+| | 7 | 8 | 9 | | + | | | |   .' ___  |  | || |     /  \\     | || |  |_   _|     | || |   .' ___  |  | |
+| |___|___|___| |___| | | |  / .'   \\_|  | || |    / /\\ \\    | || |    | |       | || |  / .'   \\_|  | |
+| | 4 | 5 | 6 | | - | | | |  | |         | || |   / ____ \\   | || |    | |   _   | || |  | |         | |
+| |___|___|___| |___| | | |  \\ \`.___.'\\  | || | _/ /    \\ \\_ | || |   _| |__/ |  | || |  \\ \`.___.'\\  | |
+| | 1 | 2 | 3 | | x | | | |   \`._____.'  | || ||____|  |____|| || |  |________|  | || |   \`._____.'  | |
+| |___|___|___| |___| | | |              | || |              | || |              | || |              | |
+| | . | 0 | = | | / | | | '--------------' || '--------------' || '--------------' || '--------------' |
+| |___|___|___| |___| |  '----------------'  '----------------'  '----------------'  '----------------'
+|_____________________|
+`;
+
+let no1 = null;
+let no2 = null;
+let operation = null;
+let ending = null;
+
+function print(text = "") {
+    terminal.innerHTML += text + "\n";
+    window.scrollTo(0, document.body.scrollHeight);
+}
+
+function input(promptText, callback) {
+    const span = document.createElement("span");
+    span.innerHTML = `<span class="prompt">${promptText}</span>`;
+    const inp = document.createElement("input");
+    span.appendChild(inp);
+    terminal.appendChild(span);
+    inp.focus();
+
+    inp.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") {
+            const value = inp.value;
+            terminal.removeChild(span);
+            print(promptText + value);
+            callback(value);
+        }
+    });
+}
+
+function calculate() {
+    if (!["+", "-", "*", "/"].includes(operation)) {
+        print("You typed the wrong operation.");
+        start();
+        return;
+    }
+
+    if (operation === "/" && no2 === 0) {
+        print("You cannot divide by zero.");
+        start();
+        return;
+    }
+
+    let result;
+    if (operation === "+") result = no1 + no2;
+    if (operation === "-") result = no1 - no2;
+    if (operation === "*") result = no1 * no2;
+    if (operation === "/") result = no1 / no2;
+
+    ending = result;
+    print(`${no1} ${operation} ${no2} = ${result}`);
+    continuePrompt();
+}
+
+function continuePrompt() {
+    input(
+        `Type 'y' to continue calculating with ${ending}, or type 'n' to start a new calculation: `,
+        answer => {
+            if (answer === "y") {
+                no1 = ending;
+                pickOperation();
+            } else if (answer === "n") {
+                print("\n".repeat(5));
+                print(logo);
+                start();
+            } else {
+                print("You typed the wrong inputs.");
+            }
+        }
+    );
+}
+
+function pickOperation() {
+    print("+\n-\n*\n/");
+    input("Pick an operation: ", op => {
+        operation = op;
+        input("What's the next number?: ", num => {
+            no2 = parseFloat(num);
+            calculate();
+        });
+    });
+}
+
+function start() {
+    input("What's the first number?: ", num => {
+        no1 = parseFloat(num);
+        pickOperation();
+    });
+}
+
+print(logo);
+start();
+</script>
+
+</body>
+</html>
